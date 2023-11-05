@@ -1,0 +1,13 @@
+{{define "Head"}}
+    <link rel="stylesheet" href="../static/home.css">
+    <title>Goland + HTMX by momo</title>
+{{end}}
+
+{{define "Body"}}
+    <main>
+        <h1>Welcome</h1>
+        <p>Momo</p>
+        <button hx-post="/" hx-vals='{"name": "John Doe"}'>Click Me</button>
+    </main>
+
+{{end}}
