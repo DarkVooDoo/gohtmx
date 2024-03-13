@@ -3,11 +3,17 @@
     <title>Goland + HTMX by momo</title>
 {{end}}
 
+{{define "Style"}}
+    p{
+        color: red;
+    }
+{{end}}
+
 {{define "Body"}}
     <main>
         <h1>Welcome</h1>
         <p>Momo</p>
-        <button hx-post="/" hx-vals='{"name": "John Doe"}'>Click Me</button>
+        <button hx-post="/" hx-ext="json-enc" hx-vals='{"name": "John Doe"}'>Click Me</button>
     </main>
 
 {{end}}

@@ -1,9 +1,12 @@
 package handler
 
 import (
+	"encoding/json"
 	"errors"
 	"gohtmx/lib"
 	"html/template"
+	"io"
+	"log"
 	"net/http"
 	"path/filepath"
 	"strings"
@@ -22,6 +25,8 @@ type Route struct {
 	Request    *http.Request
 	Response   http.ResponseWriter
 	UrlEncoded map[string]string
+    ContentType string
+    Test string
 }
 
 func NewRoute(response http.ResponseWriter, request *http.Request) *Route {
@@ -29,37 +34,59 @@ func NewRoute(response http.ResponseWriter, request *http.Request) *Route {
 	var urlEncoded map[string]string = map[string]string{}
 	if contentType == "application/x-www-form-urlencoded" {
 		urlEncoded = lib.ReadBody(request.Body)
-	}
-	return &Route{
+	}	
+    return &Route{
+        ContentType: contentType,
 		Request:    request,
+        Test: "",
 		Response:   response,
 		Params:     map[string]string{},
 		UrlEncoded: urlEncoded,
 	}
 }
 
-func (r *Route) Post(handleFunc func()) {
+func DecodeJson(jsonStruct any, body io.ReadCloser){
+    decoder := json.NewDecoder(body)
+    err := decoder.Decode(jsonStruct)
+    if err != nil{
+        log.Println("error decoding")
+    }
+
+}
+
+func (r *Route) Post(jsonStruct any, handleFunc func()) {
 	if r.Request.Method == http.MethodPost {
+        if r.ContentType == "application/json" && jsonStruct != nil{
+            DecodeJson(jsonStruct, r.Request.Body)  
+        }
 		handleFunc()
 	}
 }
 
-func (r *Route) Patch(handleFunc func()) {
+func (r *Route) Patch(jsonStruct any, handleFunc func()) {
 	if r.Request.Method == http.MethodPatch {
+        if r.ContentType == "application/json" && jsonStruct != nil{
+            DecodeJson(jsonStruct, r.Request.Body)  
+        }
+
 		handleFunc()
 	}
 }
 
-func (r *Route) Delete(handleFunc func()) {
-	if r.Request.Method == http.MethodDelete {
-		handleFunc()
+func (r *Route) Delete(jsonStruct any, handleFunc func()) {
+    if r.Request.Method == http.MethodDelete {
+        if r.ContentType == "application/json" && jsonStruct != nil{
+            DecodeJson(jsonStruct, r.Request.Body)  
+        }
+
+        handleFunc()
 	}
 }
 
 func (r *Route) Get(handlerFunc func()) {
 	if r.Request.Method == http.MethodGet {
 		handlerFunc()
-	}
+    }
 }
 
 func (r *Route) GetParams(pattern string, keys ...string) error {
