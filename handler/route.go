@@ -2,14 +2,11 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
 	"gohtmx/lib"
 	"html/template"
 	"io"
 	"log"
 	"net/http"
-	"path/filepath"
-	"strings"
 )
 
 type RouteInterface interface {
@@ -26,7 +23,6 @@ type Route struct {
 	Response   http.ResponseWriter
 	UrlEncoded map[string]string
     ContentType string
-    Test string
 }
 
 func NewRoute(response http.ResponseWriter, request *http.Request) *Route {
@@ -38,7 +34,6 @@ func NewRoute(response http.ResponseWriter, request *http.Request) *Route {
     return &Route{
         ContentType: contentType,
 		Request:    request,
-        Test: "",
 		Response:   response,
 		Params:     map[string]string{},
 		UrlEncoded: urlEncoded,
@@ -89,15 +84,15 @@ func (r *Route) Get(handlerFunc func()) {
     }
 }
 
-func (r *Route) GetParams(pattern string, keys ...string) error {
-	isValid, _ := filepath.Match(pattern, r.Request.URL.Path)
-	if !isValid {
-		temp, _ := template.ParseFiles("route/nofound.html")
-		temp.Execute(r.Response, nil)
-		return errors.New("error")
-	}
-	for _, key := range keys {
-		r.Params[key] = strings.Replace(r.Request.URL.Path, pattern[:len(pattern)-1], "", 1)
-	}
-	return nil
+func (r *Route) Render(writer http.ResponseWriter, payload interface{}, files ...string){
+    temp, err := template.ParseFiles(files...)
+    if err != nil{
+        log.Println(err)
+        return 
+    }
+    if err := temp.Execute(writer, payload); err != nil{
+        log.Println(err)
+        return
+    }
 }
+

@@ -14,6 +14,7 @@ var HomepageRoute = func(res http.ResponseWriter, req *http.Request) {
     route := NewRoute(res, req)
 	route.Get(func() {
 		temp, _ := template.ParseFiles("route/template.html", "route/page.html")
+        
 		temp.Execute(route.Response, nil)
 	})
     type Test struct{
